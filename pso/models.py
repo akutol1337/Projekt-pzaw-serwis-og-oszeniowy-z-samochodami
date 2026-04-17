@@ -24,14 +24,14 @@ class Car(models.Model):
         validators=[MinValueValidator(10000),MaxValueValidator(9999999)]
     )
 
-    milage = models.IntegerField(
+    mileage = models.IntegerField(
         "Przebieg (w km)",
         default=0,
         validators=[MinValueValidator(0),MaxValueValidator(999999)]
     )
 
     description = models.TextField(
-        "Opis",
+        "Opis,",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

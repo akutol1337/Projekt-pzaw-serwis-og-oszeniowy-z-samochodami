@@ -26,4 +26,6 @@ router.register(r'cars', CarViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+
+    path('logowanie/', include('rest_framework.urls')),
 ]
