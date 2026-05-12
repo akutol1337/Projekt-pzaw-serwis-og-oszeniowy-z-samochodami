@@ -17,15 +17,13 @@ Użytkownik do zalogowania!
  haslo : przyklad
 
 
-rejestracja:
-
-http://127.0.0.1:8000/register/  
-
-ogloszenie-wyszukiwarka
-
-http://127.0.0.1:8000/api/cars/
-
+zrobione:
 logowanie
+połączenie frontend - backend
 
-http://127.0.0.1:8000/logowanie/login/?next=/api/cars/
+do zrobienia:
+rejestracja
+widocznosc
+przegladarka
+mozliwa walidacja
 
