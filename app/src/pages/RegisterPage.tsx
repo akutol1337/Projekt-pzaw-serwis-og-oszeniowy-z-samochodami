@@ -5,7 +5,6 @@ import { Car, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 
 function getPasswordStrength(password: string): number {
@@ -28,7 +27,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false); // Dodane dla lepszego UX
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -47,15 +46,38 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (register(email, password, name, phone)) {
-      addToast('Konto zostalo utworzone!', 'success');
-      navigate('/');
-    } else {
-      addToast('Uzytkownik o podanym emailu juz istnieje', 'error');
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/konta/rejestracja/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          imie_nazwisko: name,
+          telefon: phone
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        addToast('Konto zostało utworzone! Możesz się zalogować.', 'success');
+        navigate('/logowanie');
+      } else {
+        addToast(data.blad || 'Błąd podczas rejestracji', 'error');
+      }
+    } catch (error) {
+      console.error("Błąd połączenia:", error);
+      addToast('Błąd połączenia z serwerem Django', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,6 +108,7 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={errors.name ? 'border-red-500' : ''}
+              disabled={isLoading}
             />
             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
           </div>
@@ -99,6 +122,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={errors.email ? 'border-red-500' : ''}
+              disabled={isLoading}
             />
             {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
           </div>
@@ -111,6 +135,7 @@ export default function RegisterPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className={errors.phone ? 'border-red-500' : ''}
+              disabled={isLoading}
             />
             {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
           </div>
@@ -125,6 +150,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                disabled={isLoading}
               />
               <button
                 type="button"
@@ -163,14 +189,15 @@ export default function RegisterPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className={errors.confirmPassword ? 'border-red-500' : ''}
+              disabled={isLoading}
             />
             {errors.confirmPassword && (
               <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>
             )}
           </div>
 
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-            Zarejestruj sie
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+            {isLoading ? 'Tworzenie konta...' : 'Zarejestruj sie'}
           </Button>
         </form>
       </div>
